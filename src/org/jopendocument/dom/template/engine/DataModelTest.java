@@ -1,0 +1,55 @@
+/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * 
+ * Copyright 2008-2013 jOpenDocument, by ILM Informatique. All rights reserved.
+ * 
+ * The contents of this file are subject to the terms of the GNU
+ * General Public License Version 3 only ("GPL").  
+ * You may not use this file except in compliance with the License. 
+ * You can obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.html
+ * See the License for the specific language governing permissions and limitations under the License.
+ * 
+ * When distributing the software, include this License Header Notice in each file.
+ * 
+ */
+
+package org.jopendocument.dom.template.engine;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
+
+import javax.script.ScriptEngineManager;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+public class DataModelTest {
+
+    @Before
+    public void setUp() throws Exception {
+    }
+
+    @After
+    public void tearDown() throws Exception {
+    }
+
+    @Test
+    public void testEval() throws Exception {
+        final ScriptEngineDataModel dm = new ScriptEngineDataModel(new ScriptEngineManager().getEngineByName("javascript"));
+        assertNull(dm._eval("null"));
+        try {
+            dm._eval("var1");
+            fail("Undefined");
+        } catch (Exception e) {
+            // OK
+        }
+        dm.put("var1", "foobar");
+        assertEquals("foobar", dm._eval("var1"));
+        
+        // test copy()
+        assertEquals("foobar", dm.copy()._eval("var1"));
+    }
+
+}

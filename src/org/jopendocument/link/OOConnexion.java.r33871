@@ -1,0 +1,218 @@
+/*
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * 
+ * Copyright 2008-2013 jOpenDocument, by ILM Informatique. All rights reserved.
+ * 
+ * The contents of this file are subject to the terms of the GNU
+ * General Public License Version 3 only ("GPL").  
+ * You may not use this file except in compliance with the License. 
+ * You can obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.html
+ * See the License for the specific language governing permissions and limitations under the License.
+ * 
+ * When distributing the software, include this License Header Notice in each file.
+ * 
+ */
+
+package org.jopendocument.link;
+
+import org.jopendocument.util.CollectionUtils;
+import org.jopendocument.util.tools.SimpleURLClassLoader;
+import org.jopendocument.util.tools.SimpleURLClassLoader.URLCollector;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FilePermission;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.SocketPermission;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.security.CodeSource;
+import java.security.PermissionCollection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.PropertyPermission;
+import java.util.WeakHashMap;
+
+/**
+ * Connexion avec une instance d'OO
+ * 
+ * @author Administrateur
+ */
+public abstract class OOConnexion implements AutoCloseable {
+
+    // weak to let go OOInstallation instances
+    private static final Map<OOInstallation, ClassLoader> loaders = new WeakHashMap<OOInstallation, ClassLoader>(2);
+    // TODO use OOInstallation.getVersion()
+    // for now only one version (but also works with OO2)
+    private static final String OO_VERSION = "3";
+
+    protected static final int PORT = 8100;
+    protected static final int PORT_MAX = 8250;
+
+    static {
+        // needed to access .class inside a jar inside a jar.
+        org.jopendocument.util.protocol.Helper.register();
+    }
+
+    static private final URL[] getURLs(final OOInstallation ooInstall) {
+        final List<URL> from_v7 = ooInstall.getURLs(Collections.singleton("libreoffice.jar"));
+        final List<URL> res = from_v7.isEmpty() ? ooInstall.getURLs(CollectionUtils.createSet("ridl.jar", "jurt.jar", "juh.jar", "unoil.jar")) : from_v7;
+        return res.toArray(new URL[res.size()]);
+    }
+
+    static private final URL getFwkURL(final OOInstallation ooInstall) {
+        final String jarName = "OO" + OO_VERSION + "-link.jar";
+        final URL resource = OOConnexion.class.getResource(jarName);
+        if (resource == null)
+            // Did you run ant in the OO3Link project (or in ours) ?
+            throw new IllegalStateException("Missing " + jarName);
+
+        return resource;
+    }
+
+    static private final PermissionCollection addPermissions(final PermissionCollection perms, final OOInstallation ooInstall) {
+        perms.add(new FilePermission(ooInstall.getExecutable().getAbsolutePath(), "execute"));
+        perms.add(new SocketPermission("localhost:" + PORT + "-" + PORT_MAX, "connect"));
+        // needed by OO jars
+        perms.add(new PropertyPermission("*", "read"));
+        // to be able to open any document
+        perms.add(new FilePermission("<<ALL FILES>>", "read"));
+        // needed by ThreadPoolExecutor.shutdown()
+        perms.add(new RuntimePermission("modifyThread"));
+        // needed by PrinterJob.getPrinterJob()
+        perms.add(new RuntimePermission("queuePrintJob"));
+
+        // ProcessBuilder.start() calls SecurityManager.checkExec() which requires
+        // absolute path (or execute on "<<ALL FILES>>")
+
+        // needed by OOConnexion.init() to find the port
+        perms.add(new FilePermission("/usr/bin/lsof", "execute"));
+        // macOS path
+        perms.add(new FilePermission("/usr/sbin/lsof", "execute"));
+        perms.add(new FilePermission("/bin/ps", "execute"));
+        perms.add(new FilePermission("C:/Windows/System32/tasklist.exe", "execute"));
+        perms.add(new RuntimePermission("getenv.*"));
+        // needed by OOConnexion.convertToUrl()
+        perms.add(new FilePermission("/usr/bin/gvfs-info", "execute"));
+
+        return perms;
+    }
+
+    static synchronized private final ClassLoader getLoader(final OOInstallation ooInstall) {
+        ClassLoader res = loaders.get(ooInstall);
+        if (res == null) {
+            // pass our classloader otherwise the system class loader will be used. This won't work
+            // in webstart since the classpath is loaded by JNLPClassLoader, thus a class loaded by
+            // res couldn't refer to the classpath (e.g. this class) but only to the java library.
+            final URLClassLoader officeLoader = new URLClassLoader(getURLs(ooInstall), OOConnexion.class.getClassLoader()) {
+                @Override
+                protected PermissionCollection getPermissions(CodeSource codesource) {
+                    return addPermissions(super.getPermissions(codesource), ooInstall);
+                }
+            };
+            // only use SimpleURLClassLoader when really needed since it is less optimized
+            res = new SimpleURLClassLoader(new URLCollector().addJar(getFwkURL(ooInstall)), officeLoader) {
+                @Override
+                protected PermissionCollection getPermissions(CodeSource codesource) {
+                    return addPermissions(super.getPermissions(codesource), ooInstall);
+                }
+            };
+            loaders.put(ooInstall, res);
+        }
+        return res;
+    }
+
+    /**
+     * Return a connection to the default OpenOffice installation.
+     * 
+     * @return a connection to the default OpenOffice or <code>null</code> if none is found.
+     * @throws IllegalStateException if an error occurs while searching.
+     */
+    static public OOConnexion create() throws IllegalStateException {
+        final OOInstallation ooInstall;
+        try {
+            ooInstall = OOInstallation.getInstance();
+        } catch (IOException e) {
+            throw new IllegalStateException("Couldn't find default OO installation", e);
+        }
+        return create(ooInstall);
+    }
+
+    static public OOConnexion create(final OOInstallation ooInstall) throws IllegalStateException {
+        if (ooInstall == null)
+            return null;
+        try {
+            final Class<?> c = getLoader(ooInstall).loadClass("org.jopendocument.link" + OO_VERSION + ".OOConnexion");
+            return (OOConnexion) c.getConstructor(OOInstallation.class).newInstance(ooInstall);
+        } catch (Exception e) {
+            throw new IllegalStateException("Couldn't create OOCOnnexion", e);
+        }
+    }
+
+    public static void main(String[] args) throws IOException {
+        if (args.length == 0 || args.length > 2) {
+            System.out.println("Usage : " + OOConnexion.class.getName() + " officeFile | --type param");
+            System.out.println("Open officeFile in the default installation of LibreOffice");
+            System.out.println("--type is either file or url");
+            System.exit(1);
+        }
+        try (final OOConnexion conn = OOConnexion.create()) {
+            if (conn == null)
+                throw new IllegalStateException("No Office found");
+            final boolean file;
+            final String arg;
+            if (args.length == 1) {
+                file = true;
+                arg = args[0];
+            } else if (args[0].equals("--file")) {
+                file = true;
+                arg = args[1];
+            } else if (args[0].equals("--url")) {
+                file = false;
+                arg = args[1];
+            } else {
+                throw new IllegalArgumentException("Type not valid : " + args[0]);
+            }
+            if (file)
+                conn.loadDocument(new File(arg), false);
+            else
+                conn.loadDocumentFromURLAsync(arg, false);
+        }
+    }
+
+    protected abstract Component loadDocumentFromURLAsync(final String url, final boolean hidden);
+
+    /**
+     * Load a document in OpenOffice.
+     * 
+     * @param f the file to load.
+     * @param hidden <code>true</code> if no frame should be visible.
+     * @return the new component.
+     * @throws IOException if an error occurs.
+     */
+    public final Component loadDocument(final File f, final boolean hidden) throws IOException {
+        if (!f.exists())
+            throw new FileNotFoundException(f.getAbsolutePath());
+
+        return loadDocumentFromURLAsync(convertToUrl(f.getAbsolutePath()), hidden);
+    }
+
+    protected abstract String convertToUrl(String path) throws MalformedURLException;
+
+    @Override
+    public final void close() {
+        this.closeConnexion();
+    }
+
+    public abstract void closeConnexion();
+
+    /**
+     * Whether the bridge is closed.
+     * 
+     * @return <code>true</code> if {@link #closeConnexion()} was called or OpenOffice is now longer
+     *         running.
+     */
+    public abstract boolean isClosed();
+}

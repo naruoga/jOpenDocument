@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="UTF-8" ?>
+<contentDocument>
+	<element location="K9" type="fill" sheet="0">
+		<field name="ID_COMMERCIAL">
+			<field name="PRENOM" type="Initiale" suffix="." />
+			<field name="NOM" />
+		</field>
+	</element>
+
+	<element location="B9" type="fill" sheet="0">
+		<field name="NUMERO" />
+	</element>
+
+	<element location="E9" type="fill" sheet="0">
+		<field name="DATE" />
+	</element>
+
+	<element location="E5" type="replace" replacePattern="_" sheet="0">
+		<field name="ID_CLIENT">
+			<field name="FORME_JURIDIQUE" />
+			<field name="NOM" />
+		</field>
+	</element>
+	
+		<element location="K5" type="replace" replacePattern="_" sheet="0">
+		<field name="ID_CLIENT">
+			<field name="FORME_JURIDIQUE" />
+			<field name="TEL" />
+		</field>
+	</element>
+
+	<element location="H5" type="address.customer.full" sheet="0">
+	</element>
+
+	<element location="L63" type="fill" sheet="1">
+		<field name="T_HT" type="devise" />
+	</element>
+
+	<element location="L64" type="fill" sheet="1">
+		<field name="T_TVA" type="devise" />
+	</element>
+
+	<element location="L65" type="fill" sheet="1">
+		<field name="T_TTC" type="devise" />
+	</element>
+
+
+	<table sheet="1" endPageLine="66" firstLine="10" endLine="60" lastColumn="L" base="Societe" table="DEVIS_ELEMENT"
+		blankLineBeforeStyle="Titre 1" pageRef="L17">
+		<element location="B" type="fill" cellSize="60">
+			<field name="NOM" />
+		</element>
+
+		<element location="I" type="fill">
+
+			<field name="PV_HT" type="devise">
+				<exclude value="0.000000"/>
+			</field>
+		</element>
+
+		<element location="J" type="supplychain.element.qtyunit.short">
+		</element>
+
+		<element location="K" type="fill">
+			<field name="ID_TAXE" conditionField="PV_HT" conditionExpValue="0.000000">
+				<field table="TAXE" name="TAUX" op="/" number="100.0" />
+			</field>
+		</element>	
+
+		<element location="L" type="fill">
+			<field name="T_PV_HT" type="devise">
+				<exclude value="0.000000"/>
+			</field>
+		</element>
+	</table>
+</contentDocument>
