@@ -1,12 +1,10 @@
-To compile you need to put iText ( http://www.lowagie.com/iText/download.html )
-and junit4 ( http://www.junit.org/ ) into the lib/ dir. Then just call ant version 1.7+
-(if you want to generate the java5 version pass -Djre5.dir="C:\Program Files\Java\jre1.5.0_15")
+To compile and run tests use Maven :
 
-Note that you have to compile using a jdk 6, since there's a bug in the version 5 (can't
-throw a generic)
+    mvn test
 
-To validate XML (needed for JUnit tests) you need to download http://java.net/downloads/msv/releases/msv.20090415.zip and
-put msv.jar, relaxngDatatype.jar, xsdlib.jar and isorelax.jar in the classpath.
+To build the jars :
+
+    mvn package
 
 Google docs
 -----------
