@@ -1,16 +1,16 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
+ *
  * Copyright 2008-2013 jOpenDocument, by ILM Informatique. All rights reserved.
- * 
+ *
  * The contents of this file are subject to the terms of the GNU
- * General Public License Version 3 only ("GPL").  
- * You may not use this file except in compliance with the License. 
+ * General Public License Version 3 only ("GPL").
+ * You may not use this file except in compliance with the License.
  * You can obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.html
  * See the License for the specific language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each file.
- * 
+ *
  */
 
 package org.jopendocument.dom;
@@ -19,14 +19,14 @@ import static org.jopendocument.dom.Length.CM;
 import static org.jopendocument.dom.LengthUnitTest.assertEqualsWithCompareTo;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotSame;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import org.jopendocument.dom.Library.EmbeddedLibrary;
 import org.jopendocument.dom.Library.LinkedLibrary;
 import org.jopendocument.dom.ODNodeDesc.Children;
@@ -72,34 +72,80 @@ import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.xpath.XPath;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.DynamicContainer;
+import org.junit.jupiter.api.DynamicNode;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
 
-@RunWith(Parameterized.class)
 public class ODSingleXMLDocumentTest {
 
-    @Parameters(name = "ODSingleXMLDocumentTest for {0}")
-    public static Collection<?> data() {
-        final List<Object[]> l = new LinkedList<Object[]>();
+    public static Collection<XMLVersion> data() {
+        final List<XMLVersion> l = new LinkedList<XMLVersion>();
         for (final XMLVersion v : XMLVersion.values()) {
-            l.add(new Object[] { v });
+            l.add(v);
         }
         return l;
     }
 
     static public final void assertNumberEquals(final Number n1, final Number n2) {
-        assertTrue(n1 + " != " + n2, NumberUtils.areNumericallyEqual(n1, n2));
+        assertTrue(NumberUtils.areNumericallyEqual(n1, n2), n1 + " != " + n2);
     }
 
-    private final XMLVersion version;
-    private final XMLFormatVersion formatVersion;
+    private XMLVersion version;
+    private XMLFormatVersion formatVersion;
 
-    public ODSingleXMLDocumentTest(XMLVersion version) {
-        super();
+    private void initVersion(XMLVersion version) {
         this.version = version;
         this.formatVersion = OOXML.getLast(version).getFormatVersion();
+    }
+
+    @TestFactory
+    public Collection<DynamicNode> tests() {
+        final List<DynamicNode> res = new LinkedList<DynamicNode>();
+        for (final XMLVersion v : data()) {
+            res.add(DynamicContainer.dynamicContainer(v.toString(), asList(
+                    DynamicTest.dynamicTest("testGetText", () -> {
+                        initVersion(v);
+                        testGetText();
+                    }),
+                    DynamicTest.dynamicTest("testCreate", () -> {
+                        initVersion(v);
+                        testCreate();
+                    }),
+                    DynamicTest.dynamicTest("testSplit", () -> {
+                        initVersion(v);
+                        testSplit();
+                    }),
+                    DynamicTest.dynamicTest("testAdd", () -> {
+                        initVersion(v);
+                        testAdd();
+                    }),
+                    DynamicTest.dynamicTest("testAddParagraph", () -> {
+                        initVersion(v);
+                        testAddParagraph();
+                    }),
+                    DynamicTest.dynamicTest("testTable", () -> {
+                        initVersion(v);
+                        testTable();
+                    }),
+                    DynamicTest.dynamicTest("testFrame", () -> {
+                        initVersion(v);
+                        testFrame();
+                    }),
+                    DynamicTest.dynamicTest("testStyle", () -> {
+                        initVersion(v);
+                        testStyle();
+                    }),
+                    DynamicTest.dynamicTest("testMeta", () -> {
+                        initVersion(v);
+                        testMeta();
+                    }),
+                    DynamicTest.dynamicTest("testScript", () -> {
+                        initVersion(v);
+                        testScript();
+                    }))));
+        }
+        return res;
     }
 
     private ODPackage createPackage() throws IOException {
@@ -118,7 +164,6 @@ public class ODSingleXMLDocumentTest {
         SheetTest.assertValid(doc.getPackage());
     }
 
-    @Test
     public void testGetText() throws Exception {
         final TextDocument textDoc = createPackage().getTextDocument();
         final Paragraph textP = textDoc.getParagraph(1);
@@ -133,7 +178,6 @@ public class ODSingleXMLDocumentTest {
         assertEquals("Titre 2\n" + " ۝   §\n" + p1Text, textDoc.getCharacterContent(true));
     }
 
-    @Test
     public void testCreate() throws Exception {
         final ODSingleXMLDocument single = createPackage().toSingle();
         assertValid(single);
@@ -209,7 +253,6 @@ public class ODSingleXMLDocumentTest {
         }
     }
 
-    @Test
     public void testSplit() throws Exception {
         final ODPackage pkg = createPackage();
         SheetTest.assertValid(pkg);
@@ -241,7 +284,6 @@ public class ODSingleXMLDocumentTest {
         assertTrue(pkg.isSingle());
     }
 
-    @Test
     public void testAdd() throws Exception {
         final ODSingleXMLDocument single = new ODPackage(this.getClass().getResourceAsStream("empty.odt")).toSingle();
         // really empty
@@ -284,7 +326,6 @@ public class ODSingleXMLDocumentTest {
         assertEquals(pCount * 2, textDocumentParagraphs.getCount());
     }
 
-    @Test
     public void testAddParagraph() throws Exception {
         final TextDocument single = new ODPackage(this.getClass().getResourceAsStream("styles.odt")).getTextDocument();
         try {
@@ -367,7 +408,6 @@ public class ODSingleXMLDocumentTest {
         assertEquals(expectedUnit == null ? l.getUnit() : expectedUnit, width.getUnit());
     }
 
-    @Test
     public void testTable() throws Exception {
         final TextDocument textDoc = createPackage().getTextDocument();
         assertValid(textDoc);
@@ -456,7 +496,6 @@ public class ODSingleXMLDocumentTest {
         assertEqualsWithCompareTo(w.roundDecimalAmount(), total.roundDecimalAmount());
     }
 
-    @Test
     public void testFrame() throws Exception {
         final ODPackage pkg = createPackage();
         final Element frameElem = pkg.getContent().getDescendantByName(pkg.getFormatVersion().getXML().getFrameQName(), "Cadre1");
@@ -475,7 +514,6 @@ public class ODSingleXMLDocumentTest {
         assertTrue(frame.getStyle().getGraphicProperties().isContentPrinted());
     }
 
-    @Test
     public void testStyle() throws Exception {
         final StyleDesc<ParagraphStyle> pDesc = Style.getStyleDesc(ParagraphStyle.class, this.version);
 
@@ -652,7 +690,6 @@ public class ODSingleXMLDocumentTest {
         assertEquals("Heading", styleElem.getAttributeValue("parent-style-name", styleElem.getNamespace()));
     }
 
-    @Test
     public void testMeta() throws Exception {
         final ODPackage pkg = createPackage();
         final ODMeta meta = pkg.getMeta();
@@ -725,7 +762,6 @@ public class ODSingleXMLDocumentTest {
         assertEquals(origEditingCycles, meta.getEditingCycles());
     }
 
-    @Test
     public void testScript() throws Exception {
         // test toSingle()/split()
         {

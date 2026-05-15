@@ -1,22 +1,22 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
+ *
  * Copyright 2008-2013 jOpenDocument, by ILM Informatique. All rights reserved.
- * 
+ *
  * The contents of this file are subject to the terms of the GNU
- * General Public License Version 3 only ("GPL").  
- * You may not use this file except in compliance with the License. 
+ * General Public License Version 3 only ("GPL").
+ * You may not use this file except in compliance with the License.
  * You can obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.html
  * See the License for the specific language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each file.
- * 
+ *
  */
 
 package org.jopendocument.util.protocol;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.jopendocument.util.FileUtils;
 import org.jopendocument.util.PropertiesUtils;
@@ -30,30 +30,29 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Properties;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 public class HelperTest {
 
-    @Rule
-    public TemporaryFolder tmpFolder = new TemporaryFolder();
+    @TempDir
+    public File tmpFolder;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         Helper.register();
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         Helper.unregister();
     }
 
     @Test
     public void test() throws Exception {
-        final File dir = this.tmpFolder.newFolder();
+        final File dir = this.tmpFolder;
         final File outputDir = new File(dir, "classes");
         FileUtils.mkdir_p(outputDir);
 

@@ -1,16 +1,16 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
+ *
  * Copyright 2008-2013 jOpenDocument, by ILM Informatique. All rights reserved.
- * 
+ *
  * The contents of this file are subject to the terms of the GNU
- * General Public License Version 3 only ("GPL").  
- * You may not use this file except in compliance with the License. 
+ * General Public License Version 3 only ("GPL").
+ * You may not use this file except in compliance with the License.
  * You can obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.html
  * See the License for the specific language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each file.
- * 
+ *
  */
 
 package org.jopendocument.dom;
@@ -23,20 +23,22 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.*;
+
+import org.junit.jupiter.api.Test;
 
 import org.jdom.Element;
 
-public class ChildCreatorTest extends TestCase {
+public class ChildCreatorTest {
 
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
+    @org.junit.jupiter.api.BeforeEach
+    protected void setUp() throws Exception {    }
 
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
+    @org.junit.jupiter.api.AfterEach
+    protected void tearDown() throws Exception {    }
 
+
+    @Test
     public void testCreate() throws Exception {
         final XMLVersion ns = XMLVersion.getOD();
         final Element parent = new Element("p", ns.getTEXT());
@@ -78,6 +80,8 @@ public class ChildCreatorTest extends TestCase {
         assertEquals(4, parent.getContentSize());
     }
 
+
+    @Test
     public void testNull() throws Exception {
         final XMLVersion ns = XMLVersion.getOD();
         final Element parent = new Element("body", ns.getOFFICE());

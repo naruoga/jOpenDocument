@@ -1,16 +1,16 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
+ *
  * Copyright 2008-2013 jOpenDocument, by ILM Informatique. All rights reserved.
- * 
+ *
  * The contents of this file are subject to the terms of the GNU
- * General Public License Version 3 only ("GPL").  
- * You may not use this file except in compliance with the License. 
+ * General Public License Version 3 only ("GPL").
+ * You may not use this file except in compliance with the License.
  * You can obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.html
  * See the License for the specific language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each file.
- * 
+ *
  */
 
 package org.jopendocument.dom;
@@ -27,14 +27,16 @@ import java.util.Map;
 import org.jdom.Element;
 import org.jdom.Namespace;
 import org.jdom.Text;
-import org.junit.Test;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class OOXMLTest extends TestCase {
+import org.junit.jupiter.api.Test;
+
+public class OOXMLTest {
 
     private static final OOXML xml = OOXML.getLast(XMLVersion.OD);
 
+    @Test
     public void testEncodeRT() {
         final Map<String, String> styles = new HashMap<String, String>();
         styles.put("b", "Gras");
@@ -61,12 +63,16 @@ public class OOXMLTest extends TestCase {
                 JDOMUtils.output(xml.encodeRT("4 [gris]< [b]5[/b][/gris] !", styles)));
     }
 
+
+    @Test
     public void testEncodeWS() {
         final String s = "hi\thow are   you ?\n[That] was >= 3" + TextNode.VERTICAL_TAB_CHAR + "and <=3 spaces";
         final String expected = "<text:span xmlns:text=\"urn:oasis:names:tc:opendocument:xmlns:text:1.0\">hi<text:tab />how are<text:s text:c=\"3\" />you ?<text:line-break />[That] was &gt;= 3<text:line-break />and &lt;=3 spaces</text:span>";
         assertEquals(expected, JDOMUtils.output(xml.encodeWS(s)));
     }
 
+
+    @Test
     public void testInvalidChars() {
         final String s = "hi\n\thow are you ?\fPS\u0004";
         final String expected = "hi\n\thow are you ?�PS�";
@@ -79,7 +85,6 @@ public class OOXMLTest extends TestCase {
         }
         assertEquals(expected, new Text(expected).getText());
     }
-
     @Test
     public void testValidation() throws Exception {
         for (final OOXML xml : OOXML.values()) {

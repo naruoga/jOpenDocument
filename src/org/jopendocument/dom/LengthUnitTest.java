@@ -1,16 +1,16 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
+ *
  * Copyright 2008-2013 jOpenDocument, by ILM Informatique. All rights reserved.
- * 
+ *
  * The contents of this file are subject to the terms of the GNU
- * General Public License Version 3 only ("GPL").  
- * You may not use this file except in compliance with the License. 
+ * General Public License Version 3 only ("GPL").
+ * You may not use this file except in compliance with the License.
  * You can obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.html
  * See the License for the specific language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each file.
- * 
+ *
  */
 
 package org.jopendocument.dom;
@@ -21,14 +21,18 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class LengthUnitTest extends TestCase {
+import org.junit.jupiter.api.Test;
+
+public class LengthUnitTest {
 
     static public final <T> void assertEqualsWithCompareTo(final Comparable<T> o1, final T o2) {
-        assertTrue(o1 + " != " + o2, CompareUtils.equalsWithCompareTo(o1, o2));
+        assertTrue(CompareUtils.equalsWithCompareTo(o1, o2), o1 + " != " + o2);
     }
 
+
+    @Test
     public void testParseLength() throws Exception {
         assertEquals(Length.create(new BigDecimal("15.2"), LengthUnit.CM), LengthUnit.parseLength("15.2cm"));
         testPositiveLength("-15.2cm", true);
@@ -57,6 +61,8 @@ public class LengthUnitTest extends TestCase {
         }
     }
 
+
+    @Test
     public void testFormat() throws Exception {
         // assert that we use a plain string without exponent
         final BigDecimal bigDec = new BigDecimal("123.45678909E+10");
@@ -80,6 +86,8 @@ public class LengthUnitTest extends TestCase {
         assertEquals("1cm", Length.MM(10).format(LengthUnit.CM));
     }
 
+
+    @Test
     public void testConvert() throws Exception {
         final MathContext mc = MathContext.DECIMAL64;
         final MathContext noRounding = new MathContext(mc.getPrecision(), RoundingMode.UNNECESSARY);
@@ -133,6 +141,8 @@ public class LengthUnitTest extends TestCase {
         }
     }
 
+
+    @Test
     public void testLength() throws Exception {
         final Length ten_cm = Length.CM(10);
         assertEqualsWithCompareTo(Length.ZERO, ten_cm.subtract(ten_cm));

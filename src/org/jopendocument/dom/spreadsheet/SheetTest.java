@@ -1,16 +1,16 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
+ *
  * Copyright 2008-2013 jOpenDocument, by ILM Informatique. All rights reserved.
- * 
+ *
  * The contents of this file are subject to the terms of the GNU
- * General Public License Version 3 only ("GPL").  
- * You may not use this file except in compliance with the License. 
+ * General Public License Version 3 only ("GPL").
+ * You may not use this file except in compliance with the License.
  * You can obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.html
  * See the License for the specific language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each file.
- * 
+ *
  */
 
 package org.jopendocument.dom.spreadsheet;
@@ -66,9 +66,11 @@ import javax.swing.table.TableModel;
 import org.jdom.Attribute;
 import org.jdom.Element;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class SheetTest extends TestCase {
+import org.junit.jupiter.api.Test;
+
+public class SheetTest {
 
     static final DefaultTableModel tm;
     static {
@@ -81,7 +83,7 @@ public class SheetTest extends TestCase {
         tm.addRow(new Object[] { "un1", new BigDecimal("-5.320"), new Integer(123) });
     }
 
-    static public final void assertEquals(final Length o1, final Length o2) {
+    static public final void assertLengthEquals(final Length o1, final Length o2) {
         LengthUnitTest.assertEqualsWithCompareTo(o1, o2);
     }
 
@@ -89,12 +91,14 @@ public class SheetTest extends TestCase {
     private Sheet realSheet;
     private SpreadSheet calc2;
 
+    @org.junit.jupiter.api.BeforeEach
     protected void setUp() throws Exception {
         this.sheet = SpreadSheet.createEmpty(tm, XMLFormatVersion.getOOo()).getSheet(0);
         this.realSheet = ODPackage.createFromStream(this.getClass().getResourceAsStream("test.fods"), null).getSpreadSheet().getSheet(0);
         this.calc2 = null;
     }
 
+    @org.junit.jupiter.api.AfterEach
     protected void tearDown() throws Exception {
         this.sheet = null;
         this.realSheet = null;
@@ -108,6 +112,8 @@ public class SheetTest extends TestCase {
         return this.calc2;
     }
 
+
+    @Test
     public void testCreate() throws IOException {
         final DefaultTableModel empty = new DefaultTableModel();
         for (final OOXML vers : OOXML.values()) {
@@ -185,6 +191,8 @@ public class SheetTest extends TestCase {
         assertValid(repeated);
     }
 
+
+    @Test
     public void testName() throws Exception {
         final String n = "users";
         final SpreadSheet realSpread = this.realSheet.getSpreadSheet();
@@ -283,6 +291,8 @@ public class SheetTest extends TestCase {
     /*
      * Test method for 'org.jopendocument.dom.spreadsheet.Sheet.setValueAt(Object, int, int)'
      */
+
+    @Test
     public void testSetValueAt() throws Exception {
         assertEquals("col1", this.sheet.getValueAt(0, 0));
         assertEquals("col1", getFirstP(this.sheet.getImmutableCellAt(0, 0)).getCharacterContent());
@@ -387,6 +397,8 @@ public class SheetTest extends TestCase {
     /*
      * Test method for 'org.jopendocument.dom.spreadsheet.Sheet.getValueAt(int, int)'
      */
+
+    @Test
     public void testGetValueAt() {
         assertEquals(new BigDecimal(123), this.sheet.getValueAt(2, 1));
         // testGetValueAtString()
@@ -438,6 +450,8 @@ public class SheetTest extends TestCase {
     /*
      * Test method for 'org.jopendocument.dom.spreadsheet.Sheet.getRowCount()'
      */
+
+    @Test
     public void testGetCount() {
         // col labels + 1 row
         assertEquals(2, this.sheet.getRowCount());
@@ -447,6 +461,8 @@ public class SheetTest extends TestCase {
     /*
      * Test method for 'org.jopendocument.dom.spreadsheet.Sheet.ensureColumnCount(int)'
      */
+
+    @Test
     public void testEnsureColumnCount() {
         final int before = this.sheet.getColumnCount();
         final int newSize = before - 2;
@@ -454,6 +470,8 @@ public class SheetTest extends TestCase {
         assertEquals(before, this.sheet.getColumnCount());
     }
 
+
+    @Test
     public void testSetColumnCount() throws Exception {
         // test in-memory
         final int newSize = this.sheet.getColumnCount() + 5;
@@ -484,6 +502,8 @@ public class SheetTest extends TestCase {
         assertValid(this.realSheet.getSpreadSheet());
     }
 
+
+    @Test
     public void testRemoveCol() throws Exception {
         this.realSheet.setColumnCount(9, -1, true);
         assertEquals(9, this.realSheet.getColumnCount());
@@ -505,6 +525,8 @@ public class SheetTest extends TestCase {
         assertEquals(tableW, t.getWidth());
     }
 
+
+    @Test
     public void testRemoveRow() throws Exception {
         final Sheet sheet = this.getCalc2().getSheet("remove");
 
@@ -558,6 +580,8 @@ public class SheetTest extends TestCase {
         }
     }
 
+
+    @Test
     public void testSetRowCount() throws IOException {
         this.realSheet.setRowCount(3);
         // java model OK
@@ -581,6 +605,8 @@ public class SheetTest extends TestCase {
     /*
      * Test method for 'org.jopendocument.dom.spreadsheet.Sheet.getTableModel(int, int)'
      */
+
+    @Test
     public void testGetTableModel() {
         SheetTableModel<SpreadSheet> t = this.sheet.getTableModel(1, 0);
         assertEquals(tm.getColumnCount() - 1, t.getColumnCount());
@@ -601,6 +627,8 @@ public class SheetTest extends TestCase {
     /*
      * Test method for 'org.jopendocument.dom.spreadsheet.Sheet.getMutableTableModel(int, int)'
      */
+
+    @Test
     public void testGetMutableTableModel() {
         this.sheet.getMutableTableModel(1, 0).setValueAt("test", 0, 1);
         assertEquals("test", this.sheet.getCellAt("C1").getValue());
@@ -619,6 +647,8 @@ public class SheetTest extends TestCase {
         }
     }
 
+
+    @Test
     public void testMerge() throws IOException {
         {
             final Table<?> t = this.getCalc2().getSheet(0);
@@ -688,6 +718,8 @@ public class SheetTest extends TestCase {
         assertValid(this.realSheet.getSpreadSheet());
     }
 
+
+    @Test
     public void testResolve() {
         testResolve(new Point(0, 22), "A23");
         testResolve(new Point(26, 33), "AA34");
@@ -786,6 +818,8 @@ public class SheetTest extends TestCase {
         assertEquals(addr, Sheet.getAddress(p));
     }
 
+
+    @Test
     public void testDuplicateRows() throws Exception {
         this.realSheet.duplicateRows(8, 3, 2);
         assertEquals(this.realSheet.getValueAt("B11"), this.realSheet.getValueAt("B14"));
@@ -863,6 +897,8 @@ public class SheetTest extends TestCase {
         assertEquals(Table.resolve(endCell), end.get1());
     }
 
+
+    @Test
     public void testXY() throws Exception {
         final int y = 35;
         {
@@ -882,6 +918,8 @@ public class SheetTest extends TestCase {
         }
     }
 
+
+    @Test
     public void testUsedRange() throws Exception {
         final Sheet emptySheet = this.sheet.getSpreadSheet().addSheet("empty");
         assertNull(emptySheet.getUsedRange());
@@ -903,6 +941,8 @@ public class SheetTest extends TestCase {
         assertEquals(this.realSheet.getCurrentRegion("C11", true), this.realSheet.getCurrentRegion("E18", true));
     }
 
+
+    @Test
     public void testGroups() throws Exception {
         final Sheet sheet = this.getCalc2().getSheet("Groups");
         assertEquals(0, sheet.getColumnGroup().getChildren().size());
@@ -959,6 +999,8 @@ public class SheetTest extends TestCase {
         }
     }
 
+
+    @Test
     public void testRepeated() throws Exception {
         final Row<SpreadSheet> row26 = this.realSheet.getRow(26);
         assertEquals(1, row26.getRepeated());
@@ -1035,6 +1077,8 @@ public class SheetTest extends TestCase {
         }
     }
 
+
+    @Test
     public void testCellRepeated() throws Exception {
         final Sheet sheetRepeated = SpreadSheet.create(1, 15, 1).getSheet(0);
         // 1 XML element
@@ -1066,6 +1110,8 @@ public class SheetTest extends TestCase {
         assertEquals(expectedRanges, sheetRepeated.getCellRepeatedRanges(0));
     }
 
+
+    @Test
     public void testStyle() throws Exception {
         // even though the style-name is null
         assertNull(this.realSheet.getImmutableCellAt(2, 10).getStyleAttr());
@@ -1189,13 +1235,13 @@ public class SheetTest extends TestCase {
         assertNull(cellDesc.createAutoStyle(this.sheet.getSpreadSheet().getPackage()).getBackgroundColor(null));
 
         // column styles
-        assertEquals(new Length(54.38, LengthUnit.MM), this.realSheet.getColumn(1).getWidth());
+        assertLengthEquals(new Length(54.38, LengthUnit.MM), this.realSheet.getColumn(1).getWidth());
         final SpreadSheet sxc = new ODPackage(this.getClass().getResourceAsStream("test.sxc")).getSpreadSheet();
-        assertEquals(new Length(33.85, LengthUnit.MM), sxc.getSheet(0).getColumn(1).getWidth());
+        assertLengthEquals(new Length(33.85, LengthUnit.MM), sxc.getSheet(0).getColumn(1).getWidth());
 
         // row styles
-        assertEquals(new Length(9.08, LengthUnit.MM), this.realSheet.getRowStyle(2).getHeight());
-        assertEquals(new Length(4.53, LengthUnit.MM), sxc.getSheet(0).getRowStyle(1).getHeight());
+        assertLengthEquals(new Length(9.08, LengthUnit.MM), this.realSheet.getRowStyle(2).getHeight());
+        assertLengthEquals(new Length(4.53, LengthUnit.MM), sxc.getSheet(0).getRowStyle(1).getHeight());
 
         // change style
         {
@@ -1211,8 +1257,8 @@ public class SheetTest extends TestCase {
             // if we change the width of col1
             col1.setWidth(newWidth);
             // it only change that
-            assertEquals(newWidth, col1.getWidth());
-            assertEquals(initialWidth, col2.getWidth());
+            assertLengthEquals(newWidth, col1.getWidth());
+            assertLengthEquals(initialWidth, col2.getWidth());
             // and nothing else
             assertEquals(col2.getStyle().getTableColumnProperties().getBreakBefore(), col1.getStyle().getTableColumnProperties().getBreakBefore());
 
@@ -1230,7 +1276,7 @@ public class SheetTest extends TestCase {
             final ColumnStyle createdStyle = addSheet.getColumn(0).getStyle();
             assertNotNull(createdStyle);
             assertEquals(createdStyle.getName(), addSheet.getColumn(0).getPrivateStyle().getName());
-            assertEquals(Length.MM(20), addSheet.getColumn(0).getWidth());
+            assertLengthEquals(Length.MM(20), addSheet.getColumn(0).getWidth());
         }
         // change shared style referenced by one XML element
         {
@@ -1434,7 +1480,7 @@ public class SheetTest extends TestCase {
 
     static public void assertValid(final ODPackage pkg, final boolean expected) {
         final Map<String, String> areSubDocumentsValid = pkg.validateSubDocuments();
-        assertEquals(areSubDocumentsValid + "", expected, areSubDocumentsValid.isEmpty());
+        assertEquals(expected, areSubDocumentsValid.isEmpty(), areSubDocumentsValid + "");
 
         final String checkStyles = pkg.checkStyles();
         assertNull(checkStyles, checkStyles);

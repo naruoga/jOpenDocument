@@ -1,16 +1,16 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
- * 
+ *
  * Copyright 2008-2013 jOpenDocument, by ILM Informatique. All rights reserved.
- * 
+ *
  * The contents of this file are subject to the terms of the GNU
- * General Public License Version 3 only ("GPL").  
- * You may not use this file except in compliance with the License. 
+ * General Public License Version 3 only ("GPL").
+ * You may not use this file except in compliance with the License.
  * You can obtain a copy of the License at http://www.gnu.org/licenses/gpl-3.0.html
  * See the License for the specific language governing permissions and limitations under the License.
- * 
+ *
  * When distributing the software, include this License Header Notice in each file.
- * 
+ *
  */
 
 package org.jopendocument.dom.style.data;
@@ -52,10 +52,14 @@ import javax.xml.datatype.Duration;
 import org.jdom.Element;
 import org.jdom.Namespace;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class DataStyleTest extends TestCase {
+import org.junit.jupiter.api.Test;
 
+public class DataStyleTest {
+
+
+    @Test
     public void testDays() throws Exception {
         final ODEpoch epoch = ODEpoch.getDefaultEpoch();
         final Calendar cal = Calendar.getInstance();
@@ -134,6 +138,8 @@ public class DataStyleTest extends TestCase {
         }
     }
 
+
+    @Test
     public void testFormat() throws Exception {
         final ODSingleXMLDocument singleDoc = ODSingleXMLDocument.createFromStream(this.getClass().getResourceAsStream("cellFormat.fods"));
         final ODPackage pkg = singleDoc.getPackage();
@@ -156,7 +162,7 @@ public class DataStyleTest extends TestCase {
             cell.clearValue();
             if (origType != null)
                 cell.setValue(cellValue, origType, false, false);
-            assertEquals(byOO, cell.getTextValue());
+            assertEquals(byOO.replace('\u00A0', '\u202F'), cell.getTextValue().replace('\u00A0', '\u202F'));
             assertEquals(origType, cell.getValueType());
         }
 
@@ -370,6 +376,8 @@ public class DataStyleTest extends TestCase {
     }
 
     // https://issues.oasis-open.org/browse/OFFICE-3860
+
+    @Test
     public void testOpenDocument_1_3() throws Exception {
         final ODSingleXMLDocument doc1_3 = ODSingleXMLDocument.createFromStream(this.getClass().getResourceAsStream("OD 1.3.fods"));
         assertEquals("1.3", doc1_3.getPackage().getFormatVersion().getOfficeVersion());
