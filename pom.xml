@@ -5,7 +5,7 @@
 
     <groupId>org.jopendocument</groupId>
     <artifactId>jOpenDocument</artifactId>
-    <version>1.5</version>
+    <version>3.0-SNAPSHOT</version>
     <name>jOpenDocument</name>
     <description>Java library for reading and writing OpenDocument files.</description>
     <url>https://github.com/jopendocument/jOpenDocument</url>
