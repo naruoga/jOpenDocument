@@ -1,3 +1,6 @@
+[![CI](https://github.com/naruoga/jOpenDocument/actions/workflows/ci.yml/badge.svg?branch=3.0)](https://github.com/naruoga/jOpenDocument/actions/workflows/ci.yml)
+[![JitPack](https://jitpack.io/v/naruoga/jOpenDocument.svg)](https://jitpack.io/#naruoga/jOpenDocument)
+
 To compile and run tests use Maven :
 
     mvn test
